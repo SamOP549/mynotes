@@ -2,10 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mynotes/firebase_options.dart';
-import 'package:mynotes/view/login_view.dart';
-import 'package:mynotes/view/register_view.dart';
-import 'package:mynotes/view/verifyemail_view.dart';
+import 'package:mynotes/views/login_view.dart';
+import 'package:mynotes/views/register_view.dart';
+import 'package:mynotes/views/verifyemail_view.dart';
 import 'dart:developer' as devtools show log;
+
+import 'constants/routes.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,9 +18,9 @@ void main() {
     ),
     home: const HomePage(),
     routes: {
-      '/login/': (context) => const LoginView(),
-      '/register/': (context) => const RegisterView(),
-      '/notes/': (context) => const NotesView(),
+      loginRoute: (context) => const LoginView(),
+      registerRoute: (context) => const RegisterView(),
+      notesRoute: (context) => const NotesView(),
     },
   ));
 }
@@ -70,12 +72,16 @@ class _NotesViewState extends State<NotesView> {
         title: const Text('Main UI'),
         actions: [
           PopupMenuButton<MenuAction>(onSelected: (value) async {
+            final navigator = Navigator.of(context);
             switch (value) {
               case MenuAction.logout:
                 final shouldLogout = await showLogoutDialogBox(context);
                 if (shouldLogout) {
                   await FirebaseAuth.instance.signOut();
-                  Navigator.of(context).pushReplacementNamed('/login/');
+                  navigator.pushNamedAndRemoveUntil(
+                    loginRoute,
+                    (_) => false,
+                  );
                 }
             }
           }, itemBuilder: (context) {
